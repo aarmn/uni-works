@@ -1,0 +1,26 @@
+#[table]
+pub struct Permission {
+    #[primary_key]
+    identity: Identity,
+    role: String, // e.g., "admin", "moderator", "user"
+}
+
+#[reducer]
+pub fn admin_action(ctx: &ReducerContext, target_id: u64) -> Result<(), String> {
+    let caller = ctx.sender;
+    
+    // Check if caller has admin permissions
+    let permission = ctx.db.permission()
+        .filter_by_identity(&caller)
+        .get()
+        .ok_or("User has no permissions")?;
+        
+    if permission.role != "admin" {
+        return Err("Unauthorized: Admin access required".into());
+    }
+    
+    // Perform privileged admin action
+    // ...
+    
+    Ok(())
+}
